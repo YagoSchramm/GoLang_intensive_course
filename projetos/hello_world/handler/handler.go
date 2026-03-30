@@ -63,3 +63,27 @@ func (h *Handler) Get(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Falha na decodificação do notebook", http.StatusInternalServerError)
 	}
 }
+func (h *Handler) Update(w http.ResponseWriter, r *http.Request) {
+	ctx := context.TODO()
+	var body Notebook
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		http.Error(w, "Corpo inválido", http.StatusBadRequest)
+		return
+	}
+
+	var existing Notebook
+	err := h.couchdb.Get(ctx, body.ID).ScanDoc(&existing)
+	if err != nil {
+		http.Error(w, "Notebook não encontrado", http.StatusNotFound)
+		return
+	}
+	body.Rev = existing.Rev
+	newRev, err := h.couchdb.Put(ctx, body.ID, body)
+	if err != nil {
+		http.Error(w, "Erro ao atualizar Notebook: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	println(newRev)
+}

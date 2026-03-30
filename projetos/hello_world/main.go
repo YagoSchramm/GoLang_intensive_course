@@ -23,5 +23,7 @@ func main() {
 	r.HandleFunc("/health", h.Health).Methods("GET")
 	r.HandleFunc("/notebooks", h.Create).Methods("POST")
 	r.HandleFunc("/notebooks/{notebook_id}", h.Get).Methods("GET")
+	r.HandleFunc("/notebooks", h.Update).Methods("PUT")
+
 	http.ListenAndServe(":8000", r)
 }
