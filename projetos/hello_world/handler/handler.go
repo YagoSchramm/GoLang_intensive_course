@@ -87,3 +87,30 @@ func (h *Handler) Update(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	println(newRev)
 }
+func (h *Handler) Delete(w http.ResponseWriter, r *http.Request) {
+	ctx := context.TODO()
+	vars := mux.Vars(r)
+	id := vars["notebook_id"]
+	if id == "" {
+		http.Error(w, "O ID do notebook é obrigatório", http.StatusBadRequest)
+		return
+	}
+
+	// 2. Buscar a revisão atual (_rev)
+	// No CouchDB, para deletar, você precisa do ID + REV.
+	var nb Notebook
+	err := h.couchdb.Get(ctx, id).ScanDoc(&nb)
+	if err != nil {
+		http.Error(w, "Notebook não encontrado", http.StatusNotFound)
+		return
+	}
+	newRev, err := h.couchdb.Delete(ctx, id, nb.Rev)
+	if err != nil {
+		http.Error(w, "Falha ao deletar o notebook: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	println(newRev)
+	w.Header().Set("Content-Type", "application/json")
+	w.Write([]byte("Deletado com sucesso"))
+}
