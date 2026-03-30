@@ -16,6 +16,13 @@ type Handler struct {
 func New(c *kivik.DB) *Handler {
 	return &Handler{couchdb: c}
 }
+func (h *Handler) MountHandlers(r *mux.Router) {
+	r.HandleFunc("/health", h.Health).Methods("GET")
+	r.HandleFunc("/notebooks", h.Create).Methods("POST")
+	r.HandleFunc("/notebooks/{notebook_id}", h.Get).Methods("GET")
+	r.HandleFunc("/notebooks", h.Update).Methods("PUT")
+	r.HandleFunc("/notebooks/{notebook_id}", h.Delete).Methods("DELETE")
+}
 
 type HealthResponse struct {
 	Status  string `json:"status"`

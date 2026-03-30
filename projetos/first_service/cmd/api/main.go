@@ -4,7 +4,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/YagoSchramm/intensivo-helloWorld/handler"
+	"github.com/YagoSchramm/intensivo-first_service/handler"
 	"github.com/go-kivik/kivik/v4"
 	_ "github.com/go-kivik/kivik/v4/couchdb"
 	"github.com/gorilla/mux"
@@ -20,10 +20,6 @@ func main() {
 	log.Println("Basic web server")
 	r := mux.NewRouter()
 	h := handler.New(db)
-	r.HandleFunc("/health", h.Health).Methods("GET")
-	r.HandleFunc("/notebooks", h.Create).Methods("POST")
-	r.HandleFunc("/notebooks/{notebook_id}", h.Get).Methods("GET")
-	r.HandleFunc("/notebooks", h.Update).Methods("PUT")
-	r.HandleFunc("/notebooks/{notebook_id}", h.Delete).Methods("DELETE")
+	h.MountHandlers(r)
 	http.ListenAndServe(":8000", r)
 }
