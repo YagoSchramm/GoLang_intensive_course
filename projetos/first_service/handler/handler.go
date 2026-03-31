@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/YagoSchramm/intensivo-first_service/model"
 	"github.com/YagoSchramm/intensivo-first_service/service"
 	"github.com/gorilla/mux"
 )
@@ -38,7 +39,7 @@ func (h *Handler) Health(w http.ResponseWriter, r *http.Request) {
 	}
 }
 func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
-	var body service.CreateNotebookInput
+	var body model.CreateNotebookInput
 	ctx := context.TODO()
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 		http.Error(w, "falha ao decodificar corpo da requisicao", http.StatusInternalServerError)
@@ -53,7 +54,7 @@ func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) Get(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["notebook_id"]
-	var nb service.Notebook
+	var nb model.Notebook
 	ctx := context.TODO()
 	nb, err := h.service.Get(ctx, id)
 	if err != nil {
@@ -65,7 +66,7 @@ func (h *Handler) Get(w http.ResponseWriter, r *http.Request) {
 }
 func (h *Handler) Update(w http.ResponseWriter, r *http.Request) {
 	ctx := context.TODO()
-	var body service.Notebook
+	var body model.Notebook
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 		http.Error(w, "Corpo invalido", http.StatusBadRequest)
 		return
