@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/YagoSchramm/intensivo-first_service/handler"
+	"github.com/YagoSchramm/intensivo-first_service/repository"
 	"github.com/YagoSchramm/intensivo-first_service/service"
 	"github.com/go-kivik/kivik/v4"
 	_ "github.com/go-kivik/kivik/v4/couchdb"
@@ -19,7 +20,8 @@ func main() {
 	db := client.DB("notebook")
 
 	log.Println("Basic web server")
-	srv := service.NewService(db)
+	repo := repository.NewRepository(db)
+	srv := service.NewService(repo)
 	r := mux.NewRouter()
 	h := handler.NewHandler(srv)
 	h.MountHandlers(r)
