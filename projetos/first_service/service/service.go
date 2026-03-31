@@ -9,10 +9,17 @@ import (
 )
 
 type Service struct {
-	repo *repository.Repository
+	repo NotebookRepository
 }
 
-func NewService(r *repository.Repository) *Service {
+type NotebookRepository interface {
+	Create(ctx context.Context, nb repository.NotebookDB) (string, error)
+	Get(ctx context.Context, id string) (repository.NotebookDB, error)
+	Update(ctx context.Context, input model.Notebook) (string, error)
+	Delete(ctx context.Context, id string) (string, error)
+}
+
+func NewService(r NotebookRepository) *Service {
 	return &Service{repo: r}
 }
 
