@@ -5,28 +5,28 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/go-kivik/kivik/v4"
+	"github.com/YagoSchramm/intensivo-first_service/service"
 	"github.com/gorilla/mux"
 )
 
 type Handler struct {
-	couchdb *kivik.DB
+	service *service.Service
 }
 
-func New(c *kivik.DB) *Handler {
-	return &Handler{couchdb: c}
+func NewHandler(srv *service.Service) *Handler {
+	return &Handler{service: srv}
+}
+func (h *Handler) MountHandlers(r *mux.Router) {
+	r.HandleFunc("/health", h.Health).Methods("GET")
+	r.HandleFunc("/notebooks", h.Create).Methods("POST")
+	r.HandleFunc("/notebooks/{notebook_id}", h.Get).Methods("GET")
+	r.HandleFunc("/notebooks", h.Update).Methods("PUT")
+	r.HandleFunc("/notebooks/{notebook_id}", h.Delete).Methods("DELETE")
 }
 
 type HealthResponse struct {
 	Status  string `json:"status"`
 	Message string `json:"message"`
-}
-
-type Notebook struct {
-	ID          string `json:"id"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	Rev         string `json:"_rev,omitempty"`
 }
 
 func (h *Handler) Health(w http.ResponseWriter, r *http.Request) {
@@ -38,47 +38,43 @@ func (h *Handler) Health(w http.ResponseWriter, r *http.Request) {
 	}
 }
 func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
-	var body Notebook
+	var body service.CreateNotebookInput
 	ctx := context.TODO()
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 		http.Error(w, "falha ao decodificar corpo da requisicao", http.StatusInternalServerError)
 	}
-	resp, err := h.couchdb.Put(ctx, body.ID, body)
+	resp, err := h.service.Create(ctx, body)
 	if err != nil {
-		http.Error(w, "falha ao criar notebook", http.StatusInternalServerError)
+		http.Error(w, "falha ao inserir notebook no db", http.StatusInternalServerError)
 	}
 	println("DB response:", resp)
-	w.Write([]byte(body.ID))
+	w.Write([]byte("Created new notebook!"))
 }
 func (h *Handler) Get(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["notebook_id"]
-	var nb Notebook
+	var nb service.Notebook
 	ctx := context.TODO()
-	err := h.couchdb.Get(ctx, id).ScanDoc(&nb)
+	nb, err := h.service.Get(ctx, id)
 	if err != nil {
 		http.Error(w, "falha ao consultar notebook", http.StatusInternalServerError)
 	}
 	if err := json.NewEncoder(w).Encode(nb); err != nil {
-		http.Error(w, "Falha na decodificação do notebook", http.StatusInternalServerError)
+		http.Error(w, "Falha na decodificacao do notebook", http.StatusInternalServerError)
 	}
 }
 func (h *Handler) Update(w http.ResponseWriter, r *http.Request) {
 	ctx := context.TODO()
-	var body Notebook
+	var body service.Notebook
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-		http.Error(w, "Corpo inválido", http.StatusBadRequest)
+		http.Error(w, "Corpo invalido", http.StatusBadRequest)
 		return
 	}
-
-	var existing Notebook
-	err := h.couchdb.Get(ctx, body.ID).ScanDoc(&existing)
-	if err != nil {
-		http.Error(w, "Notebook não encontrado", http.StatusNotFound)
+	if body.ID == "" {
+		http.Error(w, "O ID do notebook e obrigatorio", http.StatusBadRequest)
 		return
 	}
-	body.Rev = existing.Rev
-	newRev, err := h.couchdb.Put(ctx, body.ID, body)
+	newRev, err := h.service.Update(ctx, body)
 	if err != nil {
 		http.Error(w, "Erro ao atualizar Notebook: "+err.Error(), http.StatusInternalServerError)
 		return
@@ -92,21 +88,14 @@ func (h *Handler) Delete(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["notebook_id"]
 	if id == "" {
-		http.Error(w, "O ID do notebook é obrigatório", http.StatusBadRequest)
+		http.Error(w, "O ID do notebook e obrigatorio", http.StatusBadRequest)
 		return
 	}
-	var nb Notebook
-	err := h.couchdb.Get(ctx, id).ScanDoc(&nb)
-	if err != nil {
-		http.Error(w, "Notebook não encontrado", http.StatusNotFound)
-		return
-	}
-	newRev, err := h.couchdb.Delete(ctx, id, nb.Rev)
+	newRev, err := h.service.Delete(ctx, id)
 	if err != nil {
 		http.Error(w, "Falha ao deletar o notebook: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
-
 	println(newRev)
 	w.Header().Set("Content-Type", "application/json")
 	w.Write([]byte("Deletado com sucesso"))
