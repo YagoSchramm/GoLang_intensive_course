@@ -82,3 +82,18 @@
 docker-compose exec postgres psql -U postgres -c "CREATE DATABASE surfbook_dev;
 
 ```
+
+## Verificar se foi criado
+```
+docker-compose exec postgres psql -U postgres -tAc "SELECT 1 FROM pg_database WHERE datname='surfbook_dev';" 
+```
+
+# Rodar Migration
+```
+docker-compose exec -T postgres psql -U postgres -d surfbook_dev ./migrations/00001-create-tables.up.ddl.sql
+
+```
+
+```
+docker-compose exec postgres psql -U postgres -tAc "SELECT 1 FROM pg_database WHERE datname='surfbook_dev';" 
+```
