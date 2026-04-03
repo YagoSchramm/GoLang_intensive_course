@@ -40,3 +40,14 @@ func (r *NotebookRepository) Create(ctx context.Context, notebook *model.Noteboo
 	)
 	return err
 }
+func (r *NotebookRepository) Delete(ctx context.Context, notebook_id string, user_id string) error {
+	_, err := r.db.Exec(
+		deleteNotebookQuery,
+		notebook_id,
+		user_id,
+	)
+	return err
+}
+func (r *NotebookRepository) findByUserIdNotenookId(ctx context.Context, notebook_id string, user_id string) ([]model.NotebookEntity,error){
+	notebookList,err:=
+}
