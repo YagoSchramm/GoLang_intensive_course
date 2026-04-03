@@ -34,7 +34,7 @@ func build(t *testing.T) (*service.NotebookService, func(), uuid.UUID) {
 	return srv, clean, userId
 }
 func TestServiceNotebook(t *testing.T) {
-	srv, clean, userId := build(t)
+	srv, _, userId := build(t)
 	t.Run("Create Notebook", func(t *testing.T) {
 		ctx := context.TODO()
 		input := model.CreateNotebookDTO{
@@ -45,6 +45,10 @@ func TestServiceNotebook(t *testing.T) {
 			Description: "description notebook",
 		}
 		notebook, err := srv.Create(ctx, input)
+		if err != nil {
+			t.Fatalf("Erro na criação do Notebook:%v", err)
+		}
+		t.Log(notebook)
 	})
 
 }
