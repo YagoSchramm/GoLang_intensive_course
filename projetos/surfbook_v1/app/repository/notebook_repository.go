@@ -3,8 +3,10 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"time"
 
 	"github.com/YagoSchramm/intensivo-surfbook_v1/model"
+	"github.com/google/uuid"
 )
 
 type NotebookRepository struct {
@@ -48,6 +50,31 @@ func (r *NotebookRepository) Delete(ctx context.Context, notebook_id string, use
 	)
 	return err
 }
-func (r *NotebookRepository) findByUserIdNotenookId(ctx context.Context, notebook_id string, user_id string) ([]model.NotebookEntity,error){
-	notebookList,err:=
+func (r *NotebookRepository) findByUserIdNotenookId(ctx context.Context, notebook_id string, user_id string) (*model.NotebookEntity, error) {
+	var NotebookList []model.NotebookEntity
+	rows, err := r.db.QueryContext(ctx, findByUserIDAndIDNotebookQuery, user_id, notebook_id)
+	if err != nil {
+		return nil, err
+	}
+	for rows.Next() {
+		var nb model.NotebookEntity
+		err := rows.Scan(
+			&nb.NotebookID,
+			&nb.UserID,
+			&nb.Name,
+			&nb.Description,
+			&nb.Icon,
+			&nb.Image,
+			&nb.CreatedAt,
+			&nb.UpdatedAt,
+		)
+		if err != nil {
+			return nil, err
+		}
+		NotebookList = append(NotebookList, nb)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return &NotebookList[0], nil
 }
