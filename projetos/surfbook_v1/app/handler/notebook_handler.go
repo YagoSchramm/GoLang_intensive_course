@@ -62,6 +62,4 @@ func (h *NotebookHandler) listNotebooks(w http.ResponseWriter, r *http.Request) 
 		http.Error(w, "Erro ao codificar resposta", http.StatusInternalServerError)
 		return
 	}
-	w.Write()
-
 }

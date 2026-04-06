@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"database/sql"
+	_ "embed"
 
 	"github.com/YagoSchramm/intensivo-surfbook_v1/model"
 )
@@ -15,14 +16,19 @@ func NewNotebookRepository(d *sql.DB) *NotebookRepository {
 	return &NotebookRepository{db: d}
 }
 
+//go:embed _query/list_notebook.sql
 var listNotebookQuery string
 
+//go:embed _query/create_notebook.sql
 var createNotebookQuery string
 
+//go:embed _query/delete_notebook.sql
 var deleteNotebookQuery string
 
+//go:embed _query/update_notebook.sql
 var updateNotebookQuery string
 
+//go:embed _query/find_by_user_id_notebook.sql
 var findByUserIDAndIDNotebookQuery string
 
 func (r *NotebookRepository) Create(ctx context.Context, notebook *model.NotebookEntity) error {
