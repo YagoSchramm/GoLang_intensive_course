@@ -76,3 +76,29 @@ func (r *NotebookRepository) findByUserIdNotenookId(ctx context.Context, noteboo
 	}
 	return &NotebookList[0], nil
 }
+func (r *NotebookRepository) ListNotebooks(ctx context.Context, user_id uuid.UUID) ([]*model.NotebookEntity, error) {
+	rows, err := r.db.QueryContext(ctx, listNotebookQuery, user_id)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var nbList []*model.NotebookEntity
+	for rows.Next() {
+		var nb model.NotebookEntity
+		err := rows.Scan(
+			&nb.NotebookID,
+			&nb.UserID,
+			&nb.Name,
+			&nb.Description,
+			&nb.Icon,
+			&nb.Image,
+			&nb.CreatedAt,
+			&nb.UpdatedAt,
+		)
+		if err != nil {
+			return nil, err
+		}
+		nbList = append(nbList, &nb)
+	}
+	return nbList, nil
+}
