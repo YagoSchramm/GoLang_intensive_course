@@ -3,10 +3,8 @@ package repository
 import (
 	"context"
 	"database/sql"
-	"time"
 
 	"github.com/YagoSchramm/intensivo-surfbook_v1/model"
-	"github.com/google/uuid"
 )
 
 type NotebookRepository struct {
