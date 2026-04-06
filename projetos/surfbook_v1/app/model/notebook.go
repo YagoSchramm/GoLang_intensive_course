@@ -26,13 +26,6 @@ type CreateNotebookDTO struct {
 	Icon        string `json:"icon"`
 	Image       string `json:"image"`
 }
-type NotebookEntityList struct {
-	NotebookID  uuid.UUID `json:"notebook_id"`
-	UserID      uuid.UUID `json:"user_id"`
-	Name        string    `json:"name"`
-	Description string    `json:"description"`
-	Icon        string    `json:"icon"`
-	Image       string    `json:"image"`
-	UpdatedAt   time.Time `json:"updated_at"`
-	CreatedAt   time.Time `json:"created_at"`
+type ListNotebookFromUserDTO struct {
+	User_id uuid.UUID `json:"user_id"`
 }

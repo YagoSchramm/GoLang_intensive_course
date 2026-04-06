@@ -37,3 +37,6 @@ func (n *NotebookService) Create(ctx context.Context, input model.CreateNotebook
 
 	return &notebook, nil
 }
+func (srv *NotebookService) ListFromUser(ctx context.Context, input model.ListNotebookFromUserDTO) ([]*model.NotebookEntity, error) {
+	return srv.repo.ListNotebooks(ctx, input.User_id)
+}
