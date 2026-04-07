@@ -6,6 +6,7 @@ import (
 	_ "embed"
 
 	"github.com/YagoSchramm/intensivo-surfbook_v1/model"
+	"github.com/google/uuid"
 )
 
 type NotebookRepository struct {
@@ -46,11 +47,11 @@ func (r *NotebookRepository) Create(ctx context.Context, notebook *model.Noteboo
 	)
 	return err
 }
-func (r *NotebookRepository) Delete(ctx context.Context, notebook_id string, user_id string) error {
+func (r *NotebookRepository) Delete(ctx context.Context, deleteIt model.DeleteNotebookDTO) error {
 	_, err := r.db.Exec(
 		deleteNotebookQuery,
-		notebook_id,
-		user_id,
+		deleteIt.NotebookID,
+		deleteIt.UserID,
 	)
 	return err
 }

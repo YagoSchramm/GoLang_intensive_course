@@ -29,3 +29,7 @@ type CreateNotebookDTO struct {
 type ListNotebookFromUserDTO struct {
 	User_id uuid.UUID `json:"user_id"`
 }
+type DeleteNotebookDTO struct {
+	NotebookID uuid.UUID
+	UserID     uuid.UUID
+}
