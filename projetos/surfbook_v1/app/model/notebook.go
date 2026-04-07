@@ -33,3 +33,15 @@ type DeleteNotebookDTO struct {
 	NotebookID uuid.UUID
 	UserID     uuid.UUID
 }
+type UpdateNotebookDTO struct {
+	UserID      uuid.UUID
+	NotebookID  uuid.UUID
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Icon        string `json:"icon"`
+	Image       string `json:"image"`
+}
+type FindNotebookFromUserDTO struct {
+	UserID     uuid.UUID
+	NotebookID uuid.UUID
+}

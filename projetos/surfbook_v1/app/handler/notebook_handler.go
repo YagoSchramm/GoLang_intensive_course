@@ -22,6 +22,8 @@ func (h *NotebookHandler) MountHandlers(r *mux.Router) {
 	r.HandleFunc("/notebooks", h.create).Methods("POST")
 	r.HandleFunc("/notebooks", h.listNotebooks).Methods("GET")
 	r.HandleFunc("/notebooks/{notebook_id}", h.deleteNotebook).Methods("DELETE")
+	r.HandleFunc("/notebooks/{notebook_id}", h.deleteNotebook).Methods("PATCH")
+
 }
 func (h *NotebookHandler) create(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
@@ -73,9 +75,9 @@ func (h *NotebookHandler) deleteNotebook(w http.ResponseWriter, r *http.Request)
 		return
 	}
 	vars := mux.Vars(r)
-	notebookID, err := uuid.Parse(vars["user-id"])
+	notebookID, err := uuid.Parse(vars["notebook_id"])
 	if err != nil {
-		http.Error(w, "Header user-id inválido: "+err.Error(), http.StatusBadRequest)
+		http.Error(w, "Header notebook_id inválido: "+err.Error(), http.StatusBadRequest)
 		return
 	}
 	input := model.DeleteNotebookDTO{
@@ -97,4 +99,33 @@ func (h *NotebookHandler) deleteNotebook(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
+}
+func (h *NotebookHandler) updateNotebook(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+	ctx := context.TODO()
+	userID, err := uuid.Parse(r.Header.Get("user-id"))
+	if err != nil {
+		http.Error(w, "Header user-id inválido: "+err.Error(), http.StatusBadRequest)
+		return
+	}
+	vars := mux.Vars(r)
+	notebookID, err := uuid.Parse(vars["notebook_id"])
+	if err != nil {
+		http.Error(w, "Header notebook_id inválido: "+err.Error(), http.StatusBadRequest)
+		return
+	}
+	input := model.UpdateNotebookDTO{
+		NotebookID: notebookID,
+		UserID:     userID,
+	}
+	resp, err := h.srv.Update(ctx, input)
+	if err != nil {
+		http.Error(w, "Erro ao atualizar notebook", http.StatusInternalServerError)
+		return
+	}
+	if err = json.NewEncoder(w).Encode(resp); err != nil {
+		http.Error(w, "Erro ao codificar resposta", http.StatusInternalServerError)
+		return
+	}
+	return
 }
