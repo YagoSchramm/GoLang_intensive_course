@@ -40,3 +40,6 @@ func (n *NotebookService) Create(ctx context.Context, input model.CreateNotebook
 func (srv *NotebookService) ListFromUser(ctx context.Context, input model.ListNotebookFromUserDTO) ([]*model.NotebookEntity, error) {
 	return srv.repo.ListNotebooks(ctx, input.User_id)
 }
+func (srv *NotebookService) SoftDelete(ctx context.Context, input model.DeleteNotebookDTO) error {
+	return srv.repo.Delete(ctx, input)
+}
