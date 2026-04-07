@@ -22,7 +22,8 @@ func (h *NotebookHandler) MountHandlers(r *mux.Router) {
 	r.HandleFunc("/notebooks", h.create).Methods("POST")
 	r.HandleFunc("/notebooks", h.listNotebooks).Methods("GET")
 	r.HandleFunc("/notebooks/{notebook_id}", h.deleteNotebook).Methods("DELETE")
-	r.HandleFunc("/notebooks/{notebook_id}", h.deleteNotebook).Methods("PATCH")
+	r.HandleFunc("/notebooks/{notebook_id}", h.updateNotebook).Methods("PATCH")
+	r.HandleFunc("/notebooks/{notebook_id}", h.findNotebookById).Methods("GET")
 
 }
 func (h *NotebookHandler) create(w http.ResponseWriter, r *http.Request) {
@@ -65,6 +66,35 @@ func (h *NotebookHandler) listNotebooks(w http.ResponseWriter, r *http.Request) 
 		http.Error(w, "Erro ao codificar resposta", http.StatusInternalServerError)
 		return
 	}
+}
+func (h *NotebookHandler) findNotebookById(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+	ctx := context.TODO()
+	userID, err := uuid.Parse(r.Header.Get("user-id"))
+	if err != nil {
+		http.Error(w, "Header user-id inválido: "+err.Error(), http.StatusBadRequest)
+		return
+	}
+	vars := mux.Vars(r)
+	notebookID, err := uuid.Parse(vars["notebook_id"])
+	if err != nil {
+		http.Error(w, "Header notebook_id inválido: "+err.Error(), http.StatusBadRequest)
+		return
+	}
+	input := model.FindNotebookFromUserDTO{
+		UserID:     userID,
+		NotebookID: notebookID,
+	}
+	resp, err := h.srv.FindByUserIdNoteBookId(ctx, input)
+	if err != nil {
+		http.Error(w, "Erro ao buscar notebook", http.StatusInternalServerError)
+		return
+	}
+	if err = json.NewEncoder(w).Encode(resp); err != nil {
+		http.Error(w, "Erro ao codificar resposta", http.StatusInternalServerError)
+		return
+	}
+	return
 }
 func (h *NotebookHandler) deleteNotebook(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
