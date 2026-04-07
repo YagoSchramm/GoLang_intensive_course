@@ -43,3 +43,21 @@ func (srv *NotebookService) ListFromUser(ctx context.Context, input model.ListNo
 func (srv *NotebookService) SoftDelete(ctx context.Context, input model.DeleteNotebookDTO) error {
 	return srv.repo.Delete(ctx, input)
 }
+func (srv *NotebookService) FindByUserIdNoteBookId(ctx context.Context, input model.FindNotebookFromUserDTO) (*model.NotebookEntity, error) {
+	nb, err := srv.repo.FindByUserIdNotebookId(ctx, input.NotebookID, input.UserID)
+	if err != nil {
+		return nil, err
+	}
+	return nb, nil
+}
+func (srv *NotebookService) Update(ctx context.Context, input model.UpdateNotebookDTO) (*model.NotebookEntity, error) {
+	err := srv.repo.Update(ctx, input)
+	if err != nil {
+		return nil, err
+	}
+	nb, err := srv.repo.FindByUserIdNotebookId(ctx, input.NotebookID, input.UserID)
+	if err != nil {
+		return nil, err
+	}
+	return nb, nil
+}

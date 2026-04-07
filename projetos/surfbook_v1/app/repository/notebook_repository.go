@@ -47,6 +47,19 @@ func (r *NotebookRepository) Create(ctx context.Context, notebook *model.Noteboo
 	)
 	return err
 }
+func (r *NotebookRepository) Update(ctx context.Context, updateIt model.UpdateNotebookDTO) error {
+	_, err := r.db.Exec(
+		updateNotebookQuery,
+		updateIt.NotebookID,
+		updateIt.UserID,
+		updateIt.Name,
+		updateIt.Description,
+		updateIt.Icon,
+		updateIt.Image,
+	)
+
+	return err
+}
 func (r *NotebookRepository) Delete(ctx context.Context, deleteIt model.DeleteNotebookDTO) error {
 	_, err := r.db.Exec(
 		deleteNotebookQuery,
@@ -55,7 +68,7 @@ func (r *NotebookRepository) Delete(ctx context.Context, deleteIt model.DeleteNo
 	)
 	return err
 }
-func (r *NotebookRepository) findByUserIdNotenookId(ctx context.Context, notebook_id string, user_id string) (*model.NotebookEntity, error) {
+func (r *NotebookRepository) FindByUserIdNotebookId(ctx context.Context, notebook_id uuid.UUID, user_id uuid.UUID) (*model.NotebookEntity, error) {
 	var NotebookList []model.NotebookEntity
 	rows, err := r.db.QueryContext(ctx, findByUserIDAndIDNotebookQuery, user_id, notebook_id)
 	if err != nil {
