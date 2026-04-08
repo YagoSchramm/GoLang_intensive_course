@@ -1,5 +1,5 @@
 INSERT INTO notebooks (
-	notebook_id,
+	id,
 	user_id,
 	icon,
 	name,
