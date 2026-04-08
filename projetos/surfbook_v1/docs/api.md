@@ -216,7 +216,7 @@ Deletar Notebook
 
 ---
 
-### UserTags [ToDo]
+### UserTags [Done]
 
 #### List [GET /tags]
 
