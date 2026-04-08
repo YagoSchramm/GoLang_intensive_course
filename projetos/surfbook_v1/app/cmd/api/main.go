@@ -24,8 +24,12 @@ func main() {
 	notebookRepo := repository.NewNotebookRepository(db)
 	notebookSrv := service.NewNotebookService(notebookRepo)
 	notebookHandler := handler.NewNotebookHandler(notebookSrv)
+	tagRepo := repository.NewTagRepository(db)
+	tagSrv := service.NewTagService(tagRepo)
+	tagHandler := handler.NewTagHandler(tagSrv)
 	r := mux.NewRouter()
 	notebookHandler.MountHandlers(r)
+	tagHandler.MountHandlers(r)
 	err = http.ListenAndServe(":8000", r)
 	if err != nil {
 		log.Fatalf("Inicialização do servidor não executada:%v ", err)
