@@ -378,7 +378,7 @@ Deletar Tag
       }
     ```
 
-### MetaContents [ToDo]
+### MetaContents [Doing]
 
 #### List [GET /meta-contents]
 
@@ -433,16 +433,6 @@ Buscar MetaContent por ID
           "deleted_at": null,
           "created_at": "2024-06-26T10:20:45Z",
           "updated_at": "2024-06-26T10:20:45Z"
-      }
-    ```
-
-* Response 400 (application/json)
-
-  * Body
-
-    ```
-      {
-          "error": "MetaContent não encontrada: <mensagem>"
       }
     ```
 

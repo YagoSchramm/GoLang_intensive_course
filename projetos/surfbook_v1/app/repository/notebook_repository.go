@@ -17,19 +17,19 @@ func NewNotebookRepository(d *sql.DB) *NotebookRepository {
 	return &NotebookRepository{db: d}
 }
 
-//go:embed _query/list_notebook.sql
+//go:embed _query/notebook/list_notebook.sql
 var listNotebookQuery string
 
-//go:embed _query/create_notebook.sql
+//go:embed _query/notebook/create_notebook.sql
 var createNotebookQuery string
 
-//go:embed _query/delete_notebook.sql
+//go:embed _query/notebook/delete_notebook.sql
 var deleteNotebookQuery string
 
-//go:embed _query/update_notebook.sql
+//go:embed _query/notebook/update_notebook.sql
 var updateNotebookQuery string
 
-//go:embed _query/find_by_user_id_notebook.sql
+//go:embed _query/notebook/find_by_user_id_notebook.sql
 var findByUserIDAndIDNotebookQuery string
 
 func (r *NotebookRepository) Create(ctx context.Context, notebook *model.NotebookEntity) error {
