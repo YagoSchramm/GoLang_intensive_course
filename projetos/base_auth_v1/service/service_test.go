@@ -5,9 +5,9 @@ import (
 	"os"
 	"testing"
 
-	"github.com/YagoSchramm/intensivo-first_service/model"
-	"github.com/YagoSchramm/intensivo-first_service/repository"
-	"github.com/YagoSchramm/intensivo-first_service/service"
+	"github.com/YagoSchramm/base-auth-v1/model"
+	"github.com/YagoSchramm/base-auth-v1/repository"
+	"github.com/YagoSchramm/base-auth-v1/service"
 	"github.com/go-kivik/kivik/v4"
 	_ "github.com/go-kivik/kivik/v4/couchdb"
 	"github.com/google/uuid"
@@ -39,7 +39,7 @@ func buildService(t *testing.T) (*service.Service, *repository.Repository, func(
 	}
 
 	db := client.DB(dbName)
-	repo := repository.NewRepository(db)
+	repo := repository.NewRepository(db, db)
 	srv := service.NewService(repo)
 
 	cleanup := func() {

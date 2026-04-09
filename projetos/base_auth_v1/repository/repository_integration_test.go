@@ -5,8 +5,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/YagoSchramm/intensivo-first_service/model"
-	"github.com/YagoSchramm/intensivo-first_service/repository"
+	"github.com/YagoSchramm/base-auth-v1/model"
+	"github.com/YagoSchramm/base-auth-v1/repository"
 	"github.com/go-kivik/kivik/v4"
 	_ "github.com/go-kivik/kivik/v4/couchdb"
 	"github.com/google/uuid"
@@ -40,7 +40,7 @@ func TestRepositoryCRUDIntegration(t *testing.T) {
 	}()
 
 	db := client.DB(dbName)
-	repo := repository.NewRepository(db)
+	repo := repository.NewRepository(db, db)
 
 	docID := "nb-" + uuid.New().String()
 	_, err = repo.Create(ctx, repository.NotebookDB{

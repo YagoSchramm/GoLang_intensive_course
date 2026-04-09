@@ -2,13 +2,15 @@ package repository
 
 import (
 	"context"
+	"log"
 
-	"github.com/YagoSchramm/intensivo-first_service/model"
+	"github.com/YagoSchramm/base-auth-v1/model"
 	"github.com/go-kivik/kivik/v4"
 )
 
 type Repository struct {
-	db *kivik.DB
+	db     *kivik.DB
+	userdb *kivik.DB
 }
 
 type NotebookDB struct {
@@ -17,9 +19,15 @@ type NotebookDB struct {
 	Description string `json:"description"`
 	Rev         string `json:"_rev,omitempty"`
 }
+type UserDB struct {
+	UserName string `json:"name"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
+	Rev      string `json:"_rev,omitempty"`
+}
 
-func NewRepository(d *kivik.DB) *Repository {
-	return &Repository{db: d}
+func NewRepository(d *kivik.DB, u *kivik.DB) *Repository {
+	return &Repository{db: d, userdb: u}
 }
 
 func (r *Repository) Create(ctx context.Context, nb NotebookDB) (string, error) {
@@ -54,4 +62,32 @@ func (r *Repository) Delete(ctx context.Context, id string) (string, error) {
 		return "", err
 	}
 	return r.db.Delete(ctx, id, existing.Rev)
+}
+func (r *Repository) CreateUser(ctx context.Context, u *model.SignUpUserDTO) (string, error) {
+	user := UserDB{
+		UserName: u.Name,
+		Email:    u.Email,
+		Password: u.Password,
+		Rev:      "",
+	}
+	_, err := r.userdb.Put(ctx, u.Name, user)
+	if err != nil {
+		return "", err
+	}
+	return "1", err
+}
+
+func (r *Repository) GetUser(ctx context.Context, userName string) (*model.UserEntityDomain, error) {
+	var user UserDB
+	log.Println(userName)
+	if err := r.userdb.Get(ctx, userName).ScanDoc(&user); err != nil {
+		log.Print(err)
+		return nil, err
+	}
+	userdto := model.UserEntityDomain{
+		Name:     user.UserName,
+		Email:    user.Email,
+		Password: user.Password,
+	}
+	return &userdto, nil
 }

@@ -4,9 +4,9 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/YagoSchramm/intensivo-first_service/handler"
-	"github.com/YagoSchramm/intensivo-first_service/repository"
-	"github.com/YagoSchramm/intensivo-first_service/service"
+	"github.com/YagoSchramm/base-auth-v1/handler"
+	"github.com/YagoSchramm/base-auth-v1/repository"
+	"github.com/YagoSchramm/base-auth-v1/service"
 	"github.com/go-kivik/kivik/v4"
 	_ "github.com/go-kivik/kivik/v4/couchdb"
 	"github.com/gorilla/mux"
@@ -18,9 +18,9 @@ func main() {
 		log.Fatalf("erro ao criar cliente CouchDB: %s", err)
 	}
 	db := client.DB("notebook")
-
+	userdb := client.DB("user")
 	log.Println("Basic web server")
-	repo := repository.NewRepository(db)
+	repo := repository.NewRepository(db, userdb)
 	srv := service.NewService(repo)
 	r := mux.NewRouter()
 	h := handler.NewHandler(srv)

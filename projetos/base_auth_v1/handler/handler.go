@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/YagoSchramm/intensivo-first_service/model"
-	"github.com/YagoSchramm/intensivo-first_service/service"
+	"github.com/YagoSchramm/base-auth-v1/model"
+	"github.com/YagoSchramm/base-auth-v1/service"
 	"github.com/gorilla/mux"
 )
 
@@ -20,6 +20,8 @@ func NewHandler(srv *service.Service) *Handler {
 func (h *Handler) MountHandlers(r *mux.Router) {
 	r.HandleFunc("/health", h.Health).Methods("GET")
 	r.HandleFunc("/notebooks", h.Create).Methods("POST")
+	r.HandleFunc("/auth/signup", h.Singup).Methods("POST")
+	r.HandleFunc("/auth/signin", h.SignIn).Methods("POST")
 	r.HandleFunc("/notebooks/{notebook_id}", h.Get).Methods("GET")
 	r.HandleFunc("/notebooks", h.Update).Methods("PUT")
 	r.HandleFunc("/notebooks/{notebook_id}", h.Delete).Methods("DELETE")
@@ -50,6 +52,37 @@ func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
 	}
 	println("DB response:", resp)
 	w.Write([]byte("Created new notebook!"))
+}
+func (h *Handler) Singup(w http.ResponseWriter, r *http.Request) {
+	var body model.SignUpUserDTO
+	ctx := context.TODO()
+	defer r.Body.Close()
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		http.Error(w, "falha ao decodificar corpo da requisicao", http.StatusInternalServerError)
+	}
+	resp, err := h.service.SignUp(ctx, body)
+	if err != nil {
+		http.Error(w, "falha ao fazer signup", http.StatusInternalServerError)
+	}
+	println("DB response:", resp)
+	w.Header().Set("Content-Type", "application/json")
+	w.Write([]byte(resp.Token))
+}
+func (h *Handler) SignIn(w http.ResponseWriter, r *http.Request) {
+	var body model.SignInUserDTO
+	ctx := context.TODO()
+	defer r.Body.Close()
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		http.Error(w, "falha ao decodificar corpo da requisicao"+err.Error(), http.StatusInternalServerError)
+	}
+	resp, err := h.service.SignIn(ctx, body)
+	if err != nil {
+		http.Error(w, "falha ao fazer signin", http.StatusInternalServerError)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(resp); err != nil {
+		http.Error(w, "Falha na decodificacao do usuário", http.StatusInternalServerError)
+	}
 }
 func (h *Handler) Get(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
