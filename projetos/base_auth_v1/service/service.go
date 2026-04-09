@@ -3,23 +3,16 @@ package service
 import (
 	"context"
 
-	"github.com/YagoSchramm/intensivo-first_service/model"
-	"github.com/YagoSchramm/intensivo-first_service/repository"
+	"github.com/YagoSchramm/base-auth-v1/model"
+	"github.com/YagoSchramm/base-auth-v1/repository"
 	"github.com/google/uuid"
 )
 
 type Service struct {
-	repo NotebookRepository
+	repo *repository.Repository
 }
 
-type NotebookRepository interface {
-	Create(ctx context.Context, nb repository.NotebookDB) (string, error)
-	Get(ctx context.Context, id string) (repository.NotebookDB, error)
-	Update(ctx context.Context, input model.Notebook) (string, error)
-	Delete(ctx context.Context, id string) (string, error)
-}
-
-func NewService(r NotebookRepository) *Service {
+func NewService(r *repository.Repository) *Service {
 	return &Service{repo: r}
 }
 

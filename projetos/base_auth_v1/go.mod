@@ -1,4 +1,4 @@
-module github.com/YagoSchramm/intensivo-first_service
+module github.com/YagoSchramm/base-auth-v1
 
 go 1.25.6
 
