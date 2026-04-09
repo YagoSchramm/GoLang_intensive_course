@@ -74,12 +74,11 @@ func (r *Repository) CreateUser(ctx context.Context, u *model.SignUpUserDTO) (st
 	if err != nil {
 		return "", err
 	}
-	return "1", err
+	return "", err
 }
 
 func (r *Repository) GetUser(ctx context.Context, userName string) (*model.UserEntityDomain, error) {
 	var user UserDB
-	log.Println(userName)
 	if err := r.userdb.Get(ctx, userName).ScanDoc(&user); err != nil {
 		log.Print(err)
 		return nil, err

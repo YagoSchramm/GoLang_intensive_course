@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/YagoSchramm/base-auth-v1/middleware"
 	"github.com/YagoSchramm/base-auth-v1/model"
 	"github.com/YagoSchramm/base-auth-v1/service"
 	"github.com/gorilla/mux"
@@ -18,13 +19,18 @@ func NewHandler(srv *service.Service) *Handler {
 	return &Handler{service: srv}
 }
 func (h *Handler) MountHandlers(r *mux.Router) {
+	identifyMiddleware := middleware.Identify(h.service.Finduser)
+	r.Use(middleware.LogStartandDuration)
 	r.HandleFunc("/health", h.Health).Methods("GET")
-	r.HandleFunc("/notebooks", h.Create).Methods("POST")
-	r.HandleFunc("/auth/signup", h.Singup).Methods("POST")
-	r.HandleFunc("/auth/signin", h.SignIn).Methods("POST")
-	r.HandleFunc("/notebooks/{notebook_id}", h.Get).Methods("GET")
-	r.HandleFunc("/notebooks", h.Update).Methods("PUT")
-	r.HandleFunc("/notebooks/{notebook_id}", h.Delete).Methods("DELETE")
+	a := r.PathPrefix("/auth").Subrouter()
+	a.HandleFunc("/signup", h.Singup).Methods("POST")
+	a.HandleFunc("/signin", h.SignIn).Methods("POST")
+	api := r.PathPrefix("/api").Subrouter()
+	api.Use(identifyMiddleware)
+	api.HandleFunc("/notebooks", h.Create).Methods("POST")
+	api.HandleFunc("/notebooks/{notebook_id}", h.Get).Methods("GET")
+	api.HandleFunc("/notebooks", h.Update).Methods("PUT")
+	api.HandleFunc("/notebooks/{notebook_id}", h.Delete).Methods("DELETE")
 }
 
 type HealthResponse struct {
@@ -42,7 +48,12 @@ func (h *Handler) Health(w http.ResponseWriter, r *http.Request) {
 }
 func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
 	var body model.CreateNotebookInput
-	ctx := context.TODO()
+	ctx := r.Context()
+	userRaw := ctx.Value("user")
+	user, ok := userRaw.(*model.UserEntityDomain)
+	if !ok || user == nil {
+		http.Error(w, "user not in context", http.StatusForbidden)
+	}
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 		http.Error(w, "falha ao decodificar corpo da requisicao", http.StatusInternalServerError)
 	}
@@ -88,7 +99,13 @@ func (h *Handler) Get(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["notebook_id"]
 	var nb model.Notebook
-	ctx := context.TODO()
+	ctx := r.Context()
+	userRaw := ctx.Value("user")
+	user, ok := userRaw.(*model.UserEntityDomain)
+	if !ok || user == nil {
+		http.Error(w, "user not in context", http.StatusForbidden)
+		return
+	}
 	nb, err := h.service.Get(ctx, id)
 	if err != nil {
 		http.Error(w, "falha ao consultar notebook", http.StatusInternalServerError)

@@ -60,3 +60,12 @@ func (s *Service) SignIn(ctx context.Context, input model.SignInUserDTO) (*model
 		Token: foundation.ToBase64(current_user.Name),
 	}, nil
 }
+
+func (s *Service) Finduser(ctx context.Context, username string) (*model.UserEntityDomain, error) {
+
+	current_user, err := s.repo.GetUser(ctx, username)
+	if err != nil {
+		return nil, err
+	}
+	return current_user, nil
+}
