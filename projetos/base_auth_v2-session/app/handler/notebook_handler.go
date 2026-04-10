@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/YagoSchramm/base-auth-v2-session/middleware"
 	"github.com/YagoSchramm/base-auth-v2-session/model"
 	"github.com/YagoSchramm/base-auth-v2-session/service"
 	"github.com/google/uuid"
@@ -12,13 +13,15 @@ import (
 )
 
 type NotebookHandler struct {
-	srv *service.NotebookService
+	srv       *service.NotebookService
+	jwtSecret string
 }
 
-func NewNotebookHandler(srv *service.NotebookService) *NotebookHandler {
-	return &NotebookHandler{srv: srv}
+func NewNotebookHandler(srv *service.NotebookService, jwtSecret string) *NotebookHandler {
+	return &NotebookHandler{srv: srv, jwtSecret: jwtSecret}
 }
 func (h *NotebookHandler) MountHandlers(r *mux.Router) {
+	r.Use(middleware.AuthMiddleware(h.jwtSecret))
 	r.HandleFunc("/notebooks", h.create).Methods("POST")
 	r.HandleFunc("/notebooks", h.listNotebooks).Methods("GET")
 	r.HandleFunc("/notebooks/{notebook_id}", h.deleteNotebook).Methods("DELETE")
