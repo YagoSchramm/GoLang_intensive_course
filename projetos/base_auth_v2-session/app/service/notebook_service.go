@@ -1,0 +1,63 @@
+package service
+
+import (
+	"context"
+	"time"
+
+	"github.com/YagoSchramm/base-auth-v2-session/model"
+	"github.com/YagoSchramm/base-auth-v2-session/repository"
+	"github.com/google/uuid"
+)
+
+type NotebookService struct {
+	repo *repository.NotebookRepository
+}
+
+func NewNotebookService(rep *repository.NotebookRepository) *NotebookService {
+	return &NotebookService{repo: rep}
+}
+func (n *NotebookService) Create(ctx context.Context, input model.CreateNotebookDTO) (*model.NotebookEntity, error) {
+	id := uuid.New()
+	now := time.Now()
+	notebook := model.NotebookEntity{
+		NotebookID:  id,
+		UserID:      input.UserID,
+		Name:        input.Name,
+		Image:       input.Image,
+		Description: input.Description,
+		Icon:        input.Icon,
+		DeletedAt:   nil,
+		UpdatedAt:   now,
+		CreatedAt:   now,
+	}
+	err := n.repo.Create(ctx, &notebook)
+	if err != nil {
+		return nil, err
+	}
+
+	return &notebook, nil
+}
+func (srv *NotebookService) ListFromUser(ctx context.Context, input model.ListNotebookFromUserDTO) ([]*model.NotebookEntity, error) {
+	return srv.repo.ListNotebooks(ctx, input.User_id)
+}
+func (srv *NotebookService) SoftDelete(ctx context.Context, input model.DeleteNotebookDTO) error {
+	return srv.repo.Delete(ctx, input)
+}
+func (srv *NotebookService) FindByUserIdNoteBookId(ctx context.Context, input model.FindNotebookFromUserDTO) (*model.NotebookEntity, error) {
+	nb, err := srv.repo.FindByUserIdNotebookId(ctx, input.NotebookID, input.UserID)
+	if err != nil {
+		return nil, err
+	}
+	return nb, nil
+}
+func (srv *NotebookService) Update(ctx context.Context, input model.UpdateNotebookDTO) (*model.NotebookEntity, error) {
+	err := srv.repo.Update(ctx, input)
+	if err != nil {
+		return nil, err
+	}
+	nb, err := srv.repo.FindByUserIdNotebookId(ctx, input.NotebookID, input.UserID)
+	if err != nil {
+		return nil, err
+	}
+	return nb, nil
+}
