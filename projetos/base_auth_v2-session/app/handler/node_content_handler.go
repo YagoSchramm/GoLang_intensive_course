@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/YagoSchramm/base-auth-v2-session/middleware"
 	"github.com/YagoSchramm/base-auth-v2-session/model"
 	"github.com/YagoSchramm/base-auth-v2-session/service"
 	"github.com/google/uuid"
@@ -12,14 +13,16 @@ import (
 )
 
 type NodeContentHandler struct {
-	srv *service.NodeContentService
+	srv       *service.NodeContentService
+	jwtSecret string
 }
 
-func NewNodeContentHandler(srv *service.NodeContentService) *NodeContentHandler {
-	return &NodeContentHandler{srv: srv}
+func NewNodeContentHandler(srv *service.NodeContentService, jwtSecret string) *NodeContentHandler {
+	return &NodeContentHandler{srv: srv, jwtSecret: jwtSecret}
 }
 
 func (h *NodeContentHandler) MountHandlers(r *mux.Router) {
+	r.Use(middleware.AuthMiddleware(h.jwtSecret))
 	r.HandleFunc("/node-contents", h.create).Methods("POST")
 	r.HandleFunc("/node-contents", h.listNodeContents).Methods("GET")
 	r.HandleFunc("/node-contents/{node_id}", h.deleteNodeContent).Methods("DELETE")

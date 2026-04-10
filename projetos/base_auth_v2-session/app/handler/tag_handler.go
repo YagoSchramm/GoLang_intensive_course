@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/YagoSchramm/base-auth-v2-session/middleware"
 	"github.com/YagoSchramm/base-auth-v2-session/model"
 	"github.com/YagoSchramm/base-auth-v2-session/service"
 	"github.com/google/uuid"
@@ -12,14 +13,16 @@ import (
 )
 
 type TagHandler struct {
-	srv *service.TagService
+	srv       *service.TagService
+	jwtSecret string
 }
 
-func NewTagHandler(srv *service.TagService) *TagHandler {
-	return &TagHandler{srv: srv}
+func NewTagHandler(srv *service.TagService, jwtSecret string) *TagHandler {
+	return &TagHandler{srv: srv, jwtSecret: jwtSecret}
 }
 
 func (h *TagHandler) MountHandlers(r *mux.Router) {
+	r.Use(middleware.AuthMiddleware(h.jwtSecret))
 	r.HandleFunc("/tags", h.create).Methods("POST")
 	r.HandleFunc("/tags", h.listTags).Methods("GET")
 	r.HandleFunc("/tags/{tag_id}", h.deleteTag).Methods("DELETE")

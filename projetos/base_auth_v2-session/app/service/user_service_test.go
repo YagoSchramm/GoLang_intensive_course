@@ -12,9 +12,9 @@ import (
 	"github.com/google/uuid"
 )
 
-func createUser(db *sql.DB, id uuid.UUID, name, email string) error {
-	query := `INSERT INTO users (user_id, name, email) VALUES ($1, $2, $3)`
-	_, err := db.Exec(query, id, name, email)
+func createUser(db *sql.DB, id uuid.UUID, email, password string) error {
+	query := `INSERT INTO users (id, email, password) VALUES ($1, $2, $3)`
+	_, err := db.Exec(query, id, email, password)
 	return err
 }
 
@@ -25,7 +25,7 @@ func build(t *testing.T) (*service.NotebookService, func(), uuid.UUID) {
 	conn := "postgres://postgres:pass@localhost:5432/surfbook_dev?sslmode=disable"
 
 	db, _ := foundation.NewPostgresDB(conn)
-	createUser(db, userId, "test user", "test@test.com")
+	createUser(db, userId, "test@test.com", "password123")
 	repo := repository.NewNotebookRepository(db)
 	srv := service.NewNotebookService(repo)
 	clean := func() {
