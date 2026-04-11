@@ -2,7 +2,6 @@ package service_test
 
 import (
 	"context"
-	"database/sql"
 	"testing"
 
 	"github.com/YagoSchramm/base-auth-v2-session/foundation"
@@ -12,20 +11,29 @@ import (
 	"github.com/google/uuid"
 )
 
-func createUser(db *sql.DB, id uuid.UUID, email, password string) error {
-	query := `INSERT INTO users (id, email, password) VALUES ($1, $2, $3)`
-	_, err := db.Exec(query, id, email, password)
-	return err
-}
-
 func build(t *testing.T) (*service.NotebookService, func(), uuid.UUID) {
 	t.Helper()
-	userId := uuid.New()
 
 	conn := "postgres://postgres:pass@localhost:5432/surfbook_dev?sslmode=disable"
 
 	db, _ := foundation.NewPostgresDB(conn)
-	createUser(db, userId, "test@test.com", "password123")
+
+	// Create user using service
+	userRepo := repository.NewUserRepository(db)
+	userSrv := service.NewUserService(userRepo)
+	ctx := context.TODO()
+	userInput := model.SignUpUserDTO{
+		Name:     "Test Notebook User",
+		Email:    "notebook@test.com",
+		Password: "password123",
+	}
+	user, _ := userSrv.Create(ctx, userInput)
+	var userId uuid.UUID
+	if user != nil {
+		userIdVal, _ := uuid.Parse(user.ID)
+		userId = userIdVal
+	}
+
 	repo := repository.NewNotebookRepository(db)
 	srv := service.NewNotebookService(repo)
 	clean := func() {
@@ -34,7 +42,8 @@ func build(t *testing.T) (*service.NotebookService, func(), uuid.UUID) {
 	return srv, clean, userId
 }
 func TestServiceNotebook(t *testing.T) {
-	srv, _, userId := build(t)
+	srv, clean, userId := build(t)
+	defer clean()
 	t.Run("Create Notebook", func(t *testing.T) {
 		ctx := context.TODO()
 		input := model.CreateNotebookDTO{

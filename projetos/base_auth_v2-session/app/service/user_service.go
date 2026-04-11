@@ -25,6 +25,7 @@ func (srv *UserService) Create(ctx context.Context, input model.SignUpUserDTO) (
 
 	user := model.User{
 		ID:       uuid.NewString(),
+		Name:     input.Name,
 		Email:    input.Email,
 		Password: string(hashedPassword),
 	}

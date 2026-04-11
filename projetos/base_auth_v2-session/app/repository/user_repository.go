@@ -40,7 +40,7 @@ func (r *UserRepository) CreateUser(ctx context.Context, u *model.User) (*model.
 		u.ID = uuid.NewString()
 	}
 
-	_, err := r.db.ExecContext(ctx, createUserQuery, u.ID, u.Email, u.Password)
+	_, err := r.db.ExecContext(ctx, createUserQuery, u.ID, u.Name, u.Email, u.Password)
 	if err != nil {
 		return nil, err
 	}
