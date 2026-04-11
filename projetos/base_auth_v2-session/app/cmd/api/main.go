@@ -44,6 +44,7 @@ func main() {
 	nodeContentHandler := handler.NewNodeContentHandler(nodeContentSrv, jwtSecret)
 
 	r := mux.NewRouter()
+	r.Use(middleware.LogStartandDuration)
 	userHandler.MountHandlers(r)
 
 	protected := r.NewRoute().Subrouter()
